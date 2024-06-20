@@ -1,208 +1,150 @@
 package controller;
 
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.List;
 
-import model.ClieneteFisico;
-import model.Cliente;
+import conection.Conexao;
+import model.ClienteFisico;
 
 public class ClienteFisicoDao {
-
 	
-	public Connection getConexao() throws ClassNotFoundException {
-
-		// Driver
-		String driver = "com.mysql.cj.jdbc.Driver";
-		Class.forName(driver);
-
-		// Endereço do banco de dados
-		String url = "jdbc:mysql://localhost:3306/jovem_programador";
-
-		// Usuario
-		String user = "root";
-
-		// Senha
-		String password = "root";
-
-		Connection conn = null;
-		try {
-			conn = DriverManager.getConnection(url, user, password);
-			System.out.println("Conexão realizada com sucesso");
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-		return conn;
-	}
-
-	public int inserirClienteFisico(ClieneteFisico clienteFisicoNovo) {
-
-		// SQL
-
-		String insert = "INSERT INTO" + " clienteFisico(nome, telefone, cep, logradouro, bairro, estado, idClieneteFisico, rg) "
+	public void Inserir(ClienteFisico clienteFisico) {
+		String sql = "INSERT INTO" + " clienteFisico(nome, telefone, cep, logradouro, bairro, estado, idClienteFisico, rg) "
 				+ "VALUES (?,?,?,?,?,?,?,?)";
 
+		Connection conn = null;
+		PreparedStatement pstmm = null;
+
 		try {
-			Connection conn = getConexao();
+			// conexao com DB
+			conn = Conexao.getConnection();
 
-			PreparedStatement pst = conn.prepareStatement(insert, Statement.RETURN_GENERATED_KEYS);
+			pstmm = conn.prepareStatement(sql);
+			
+			pstmm.setString(1, clienteFisico.getNome());
+			pstmm.setString(2, clienteFisico.getTelefone());
+			pstmm.setString(3, clienteFisico.getCep());
+			pstmm.setString(4, clienteFisico.getLogradouro());
+			pstmm.setString(5, clienteFisico.getBairro());
+			pstmm.setString(6, clienteFisico.getEstado());
+			pstmm.setInt(7, clienteFisico.getIdClienteFisico());
+			pstmm.setString(8, clienteFisico.getRg());
 
-			// Atribuindo os valores aos ?????
+			pstmm.execute();
+			conn.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
 		
+		public ArrayList<ClienteFisico> listaClienteFisicos() {
+			ArrayList<ClienteFisico> clienteFisicos = new ArrayList<>();
+			String read = "select * from clienteFisicos order by nome";
+			Connection conn = null;
+			PreparedStatement pstmm = null;
+			try {
+				// Abrir a conexão
+				conn = Conexao.getConnection();
+				// Preparar a query para execução no banco de dados
+				pstmm = conn.prepareStatement(read);
+				ResultSet rs = pstmm.executeQuery();
 
-			pst.setString(1, clienteFisicoNovo.getNome());
-			pst.setString(2, clienteFisicoNovo.getTelefone());
-			pst.setString(3, clienteFisicoNovo.getLogradouro());
-			pst.setString(4, clienteFisicoNovo.getBairro());
-			pst.setString(5, clienteFisicoNovo.getEstado());
-			pst.setInt(6, clienteFisicoNovo.getIdClieneteFisico());
-			pst.setString(7, clienteFisicoNovo.getRg());
-			
-			
-			// Executando 
+				// Enquanto houver ClienteFisicos será executado o laço
+				while (rs.next()) {
+					// Var de apoio que recebem os dados do banco
+					int idClienteFisico = rs.getInt(1);
+					String nome = rs.getString(2);
+					String telefone = rs.getString(3);
+					String cep = rs.getString(4);
+					String logradouro = rs.getString(5);
+					String bairro = rs.getString(6);
+					String estado = rs.getString(7);
+					String rg = rs.getString(8);
+					// Populando o ArrayList
+					clienteFisicos.add(new ClienteFisico(idClienteFisico, nome, telefone, cep, logradouro, bairro, estado, idClienteFisico, rg));
+				}
+				conn.close();
+				return clienteFisicos;
+			} catch (Exception e) {
+				System.out.println(e);
+				return null;
+			}
+		}
+		
+		// Seleionando o clienteFisico por ID
+		public void selecionarClienteFisico(ClienteFisico clienteFisico) {
+			String read = "select * from clienteFisico where idClienteFisico = ?";
+			try {
+				// Abrir a conexão
+				Connection conn = Conexao.getConnection();
+				// Preparar a query para execução no banco de dados
+				PreparedStatement pstm = conn.prepareStatement(read);
+				pstm.setLong(1, clienteFisico.getIdClienteFisico());
+				ResultSet rs = pstm.executeQuery();
+				while (rs.next()) {
 
-			pst.executeUpdate();
+					// Setando as variáveis de produto
+					clienteFisico.setIdClienteFisico(rs.getInt(1));
+					clienteFisico.setNome(rs.getString(2));
+					clienteFisico.setTelefone(rs.getString(3));
+					clienteFisico.setCep(rs.getString(4));
+					clienteFisico.setLogradouro(rs.getString(5));
+					clienteFisico.setBairro(rs.getString(6));
+					clienteFisico.setEstado(rs.getString(7));
+					clienteFisico.setRg(rs.getString(8));
+					
+				
+				}
+				conn.close();
+			} catch (Exception e) {
+				System.out.println(e);
+			}
+		}
+		
+		// Editando o clienteFisico
+		public void alterarClienteFisico(ClienteFisico clienteFisico) {
+			String create = "update ClienteFisicos set nome=?, numeroOAB=?, especializacao=?, telefone=?, email=?, cep=?, logradouro=?, bairro=?, cidade=?, estado=? where idClienteFisico=?";
+			try {
+				// Abrir a conexão
+				Connection conn = Conexao.getConnection();
+				// Preparar a query para execução no banco de dados
+				PreparedStatement pstmm = conn.prepareStatement(create);
+				pstmm.setString(1, clienteFisico.getNome());
+				pstmm.setString(2, clienteFisico.getTelefone());
+				pstmm.setString(3, clienteFisico.getCep());
+				pstmm.setString(4, clienteFisico.getLogradouro());
+				pstmm.setString(5, clienteFisico.getBairro());
+				pstmm.setString(6, clienteFisico.getEstado());
+				pstmm.setInt(7, clienteFisico.getIdClienteFisico());
+				pstmm.setString(8, clienteFisico.getRg());
+				pstmm.executeUpdate();
+				
+				conn.close();
+			} catch (Exception e) {
+				System.out.println(e);
+			}
+		}
 
-			// Retornar a chave
-
-			ResultSet rs = pst.getGeneratedKeys();
-			int chaveGerada;
-			if (rs.next() == true) {
-				chaveGerada = rs.getInt(1);
-				return chaveGerada;
-
+		/** DELETE **/
+		public void deletarClienteFisico(ClienteFisico clienteFisico) {
+			String delete = "delete from ClienteFisicos where idClienteFisico=?";
+			try {
+				// Abrir a conexão
+				Connection conn = Conexao.getConnection();
+				// Preparar a query para execução no banco de dados
+				PreparedStatement pstm = conn.prepareStatement(delete);
+				pstm.setInt(1, clienteFisico.getIdClienteFisico());
+				pstm.executeUpdate();
+				conn.close();
+			} catch (Exception e) {
+				System.out.println(e);
 			}
 
-			rs.close();
-			pst.close();
-			conn.close();
-
-		} catch (Exception e) {
-			e.printStackTrace();
 		}
 
-		return 0;
 
-	}
-
-	public List<ClieneteFisico> listaPacientes() {
-		String sql = "select * from clientesFisico";
-		List<ClieneteFisico> lista = new ArrayList<>();
-
-		try {
-
-			Connection conn = getConexao();
-			PreparedStatement pst = conn.prepareStatement(sql);
-			ResultSet rs = pst.executeQuery();
-			// variavel rs tem a linha do banco de dados
-
-			while (rs.next() == true) {
-
-				int id = rs.getInt(1);
-				String nome = rs.getString(2);
-				String telefone = rs.getString(3);
-				
-
-				
-				ClieneteFisico cliente = new ClieneteFisico(id, nome, telefone, cep, lagradouro, bairro, estado, idClieneteFisico, rg);
-				lista.add(clienteFisico);
-
-			}
-
-			rs.close();
-			pst.close();
-			conn.close();
-
-		} catch (Exception e) {
-
-			e.printStackTrace();
-		}
-
-		return lista;
-
-	}
-
-	public void deletarPaciente(int id) {
-
-		String sql = "delete from pacientes where id = ? ";
-
-		try {
-
-			Connection conn = getConexao();
-			PreparedStatement pst = conn.prepareStatement(sql);
-			pst.setInt(1, id);
-			pst.executeUpdate();
-
-			pst.close();
-			conn.close();
-
-		} catch (Exception e) {
-
-			e.printStackTrace();
-
-		}
-
-	}
-
-	public void atualizarPaciente(Paciente paciente) {
-
-		String sql = "update pacientes set nome = ?, telefone = ? where id = ?";
-
-		try {
-
-			Connection conn = getConexao();
-			PreparedStatement pst = conn.prepareStatement(sql);
-
-			pst.setString(1, paciente.getNome());
-			pst.setString(2, paciente.getTelefone());
-			
-
-			pst.executeUpdate();
-
-			pst.close();
-			conn.close();
-
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
-	}
-
-	public Paciente pesquisarPorId(int id) {
-
-		String sql = "select * from pacientes where id = ? ";
-
-		Paciente paciente = null;
-
-		try {
-			Connection conn = getConexao();
-			PreparedStatement pst = conn.prepareStatement(sql);
-			pst.setInt(1, id);
-			ResultSet rs = pst.executeQuery();
-
-			while (rs.next() == true) {
-				id = rs.getInt(1);
-				String nome = rs.getString(2);
-				String telefone = rs.getString(3);
-				
-				paciente = new Paciente(id, nome, telefone);
-			}
-
-			rs.close();
-			pst.close();
-			conn.close();
-
-		} catch (Exception e) {
-
-			e.printStackTrace();
-		}
-
-		return paciente;
-	}
+	
 
 }
