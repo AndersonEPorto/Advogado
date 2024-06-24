@@ -1,6 +1,7 @@
 package controller;
 
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
@@ -9,141 +10,133 @@ import conection.Conexao;
 import model.ProcessoCivil;
 
 public class ProcessoCivilDao {
-	
-	
-	public void Inserir(ProcessoCivil processoCivil) {
-		String sql = "INSERT INTO" + " processoCivil(id, numeroProcesso, dataInicio, partesEnvolvidas, valorCausa, faseProcesso) "
-				+ "VALUES (?,?,?,?,?)";
+
+	public void Inserir(ProcessoCivil procCivil) {
+		String sql = "INSERT INTO processosciveis (numeroProcesso, dataInicio, partesEnvolvidas, tipoAcao, valorCausa, faseProcesso) VALUES (?,?,?,?,?,?)";
 
 		Connection conn = null;
-		PreparedStatement pstmm = null;
+		PreparedStatement pstm = null;
 
 		try {
 			// conexao com DB
 			conn = Conexao.getConnection();
 
-			pstmm = conn.prepareStatement(sql);
-			
-			pstmm.setInt(1,  processoCivil.getIdProcessoCivil());
-			pstmm.setString(2, processoCivil.getNumeroProcesso());
-			pstmm.setString(3, processoCivil.getDataInicio());
-			pstmm.setString(4, processoCivil.getPartesEnvolvidas());
-			pstmm.setString(5, processoCivil.getValorCausa());
-			pstmm.setString(6, processoCivil.getFaseProcesso());
+			pstm = conn.prepareStatement(sql);
 
-			pstmm.execute();
+			pstm.setString(1, procCivil.getNumeroProcesso());
+			pstm.setDate(2, procCivil.getDataInicio());
+			pstm.setString(3, procCivil.getPartesEnvolvidas());
+			pstm.setString(4, procCivil.getTipoAcao());
+			pstm.setString(5, procCivil.getValorCausa());
+			pstm.setString(6, procCivil.getFaseProcesso());
+
+			pstm.execute();
 			conn.close();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
-		
-		public ArrayList<ProcessoCivil> listaProcessoCivil() {
-			ArrayList<ProcessoCivil> processoCivil = new ArrayList<>();
-			String read = "select * from processoCivil order by nome";
-			Connection conn = null;
-			PreparedStatement pstmm = null;
-			try {
-				// Abrir a conexão
-				conn = Conexao.getConnection();
-				// Preparar a query para execução no banco de dados
-				pstmm = conn.prepareStatement(read);
-				ResultSet rs = pstmm.executeQuery();
 
-				// Enquanto houver ProcessoCivil será executado o laço
-				while (rs.next()) {
-					// Var de apoio que recebem os dados do banco
-					int idProcessoCivil = rs.getInt(1);
-					String numeroProcesso = rs.getString(2);
-					String dataInicio = rs.getString(3);
-					String partesEnvolvidas = rs.getString(4);
-					String valorCausa = rs.getString(5);
-					String faseProcesso = rs.getString(6);
+	public ArrayList<ProcessoCivil> listaProcessosCiveis() {
+		ArrayList<ProcessoCivil> processoCivil = new ArrayList<>();
+		String read = "select * from processoCiveis order by idProcessosCiveis";
+		Connection conn = null;
+		PreparedStatement pstm = null;
+		try {
+			// Abrir a conexão
+			conn = Conexao.getConnection();
+			// Preparar a query para execução no banco de dados
+			pstm = conn.prepareStatement(read);
+			ResultSet rs = pstm.executeQuery();
 
-					// Populando o ArrayList
-					processoCivil.add(new ProcessoCivil(idProcessoCivil, numeroProcesso, dataInicio, partesEnvolvidas, valorCausa, faseProcesso));
-				}
-				
-				conn.close();
-				return processoCivil;
-			} catch (Exception e) {
-				System.out.println(e);
-				return null;
+			// Enquanto houver processoCivil será executado o laço
+			while (rs.next()) {
+				// Var de apoio que recebem os dados do banco
+				int idProcessoCiveis = rs.getInt(1);
+				String numeroProcesso = rs.getString(2);
+				Date dataInicio = rs.getDate(3);
+				String partesEnvolvidas = rs.getString(4);
+				String tipoAcao = rs.getString(5);
+				String valorCausa = rs.getString(6);
+				String faseProcesso = rs.getString(7);
+
+				// Populando o ArrayList
+				processoCivil.add(new ProcessoCivil(idProcessoCiveis, numeroProcesso, dataInicio, partesEnvolvidas, tipoAcao, valorCausa, faseProcesso));
 			}
+			conn.close();
+			return processoCivil;
+		} catch (Exception e) {
+			System.out.println(e);
+			return null;
 		}
-		
-		// Seleionando o processoCivil por ID
-		public void selecionarProcessoCivil(ProcessoCivil processoCivil) {
-			String read = "select * from processoCivil where idProcessoCivil = ?";
-			try {
-				// Abrir a conexão
-				Connection conn = Conexao.getConnection();
-				// Preparar a query para execução no banco de dados
-				PreparedStatement pstm = conn.prepareStatement(read);
-				pstm.setLong(1, processoCivil.getIdProcessoCivil());
-				ResultSet rs = pstm.executeQuery();
-				while (rs.next()) {
+	}
 
-					//(int idProcessoCivil, String numeroProcesso, String dataInicio, String partesEnvolvidas, String valorCausa, String faseProcesso)
-					
-					
-					// Setando as variáveis de produto
-					processoCivil.setIdProcessoCivil(rs.getInt(1));
-					processoCivil.setNumeroProcesso(rs.getString(2));
-					processoCivil.setDataInicio(rs.getString(3));
-					processoCivil.setPartesEnvolvidas(rs.getString(4));
-					processoCivil.setValorCausa(rs.getString(5));
-					processoCivil.setFaseProcesso(rs.getString(6));
-					
-				
-				}
-				conn.close();
-			} catch (Exception e) {
-				System.out.println(e);
+	// Seleionando o processoCivil por ID
+	public void selecionarProcessoCivil(ProcessoCivil procCivil) {
+		String read = "select * from processosCiveis where idProcessosCiveis = ?";
+		try {
+			// Abrir a conexão
+			Connection conn = Conexao.getConnection();
+			// Preparar a query para execução no banco de dados
+			PreparedStatement pst = conn.prepareStatement(read);
+			pst.setLong(1, procCivil.getIdProcessoCivil());
+			ResultSet rs = pst.executeQuery();
+			while (rs.next()) {
+
+				// Setando as variáveis de produto
+				procCivil.setIdProcessoCivil(rs.getInt(1));
+				procCivil.setNumeroProcesso(rs.getString(2));
+				procCivil.setDataInicio(rs.getDate(3));
+				procCivil.setPartesEnvolvidas(rs.getNString(4));
+				procCivil.setTipoAcao(rs.getNString(5));
+				procCivil.setValorCausa(rs.getString(6));
+				procCivil.setFaseProcesso(rs.getString(7));
+
 			}
+			conn.close();
+		} catch (Exception e) {
+			System.out.println(e);
 		}
-		
-		// Editando o processoCivil
-		public void alterarProcessoCivil(ProcessoCivil processoCivil) {
-			String create = "update ProcessoCivil set nome=?, numeroOAB=?, especializacao=?, telefone=?, email=?, cep=?, logradouro=?, bairro=?, cidade=?, estado=? where idProcessoCivil=?";
-			try {
-				// Abrir a conexão
-				Connection conn = Conexao.getConnection();
-				// Preparar a query para execução no banco de dados
-				PreparedStatement pstmm = conn.prepareStatement(create);
-				pstmm.setInt(1,  processoCivil.getIdProcessoCivil());
-				pstmm.setString(2, processoCivil.getNumeroProcesso());
-				pstmm.setString(3, processoCivil.getDataInicio());
-				pstmm.setString(4, processoCivil.getPartesEnvolvidas());
-				pstmm.setString(5, processoCivil.getValorCausa());
-				pstmm.setString(6, processoCivil.getFaseProcesso());
+	}
 
-				pstmm.executeUpdate();
-				
-				conn.close();
-			} catch (Exception e) {
-				System.out.println(e);
-			}
+	// Editando o ProcessoCivil
+	public void alterarProcessoCivil(ProcessoCivil procCivil) {
+		String create = "update processosciveis set  numeroProcessosPenais=?, dataInicio=?, nomeReu=?, tipoCrime=?, faseProcesso=?";
+		try {
+			// Abrir a conexão
+			Connection conn = Conexao.getConnection();
+			// Preparar a query para execução no banco de dados
+			PreparedStatement pst = conn.prepareStatement(create);
+			pst.setString(1, procCivil.getNumeroProcesso());
+			pst.setDate(2, procCivil.getDataInicio());
+			pst.setString(3, procCivil.getPartesEnvolvidas());
+			pst.setString(4, procCivil.getTipoAcao());
+			pst.setString(5, procCivil.getValorCausa());
+			pst.setString(6, procCivil.getFaseProcesso());
+
+			pst.executeUpdate();
+
+			conn.close();
+		} catch (Exception e) {
+			System.out.println(e);
 		}
+	}
 
-		/** DELETE **/
-		public void deletarProcessoCivil(ProcessoCivil processoCivil) {
-			String delete = "delete from ProcessoCivil where idProcessoCivil=?";
-			try {
-				// Abrir a conexão
-				Connection conn = Conexao.getConnection();
-				// Preparar a query para execução no banco de dados
-				PreparedStatement pstm = conn.prepareStatement(delete);
-				pstm.setInt(1, processoCivil.getIdProcessoCivil());
-				pstm.executeUpdate();
-				conn.close();
-			} catch (Exception e) {
-				System.out.println(e);
-			}
-
+	//DELETE ProcessoCivil
+	public void deletarProcessoCivil(ProcessoCivil procCivil) {
+		String delete = "delete from processosciveis where idProcessosCiveis=?";
+		try {
+			// Abrir a conexão
+			Connection conn = Conexao.getConnection();
+			// Preparar a query para execução no banco de dados
+			PreparedStatement pst = conn.prepareStatement(delete);
+			pst.setInt(1, procCivil.getIdProcessoCivil());
+			pst.executeUpdate();
+			conn.close();
+		} catch (Exception e) {
+			System.out.println(e);
 		}
 
-
-	
+	}
 
 }

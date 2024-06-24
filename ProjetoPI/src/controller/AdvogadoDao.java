@@ -111,7 +111,7 @@ public class AdvogadoDao {
 		
 		// Editando o advogado
 		public void alterarAdvogado(Advogado advogado) {
-			String create = "update Advogados set nome=?, numeroOAB=?, especializacao=?, telefone=?, email=?, cep=?, logradouro=?, bairro=?, cidade=?, estado=? where idAdvogado=?";
+			String create = "update Advogados set nome=?, numeroOAB=?, especializacao=?, telefone=?, email=?, cep=?, logradouro=?, bairro=?, cidade=?, estado=? where idAdvogados=?";
 			try {
 				// Abrir a conexão
 				Connection conn = Conexao.getConnection();
@@ -152,8 +152,5 @@ public class AdvogadoDao {
 			}
 
 		}
-
-
-	
 
 }
